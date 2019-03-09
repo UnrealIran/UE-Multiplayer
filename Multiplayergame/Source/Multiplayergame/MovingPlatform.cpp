@@ -10,25 +10,42 @@ AMovingPlatform::AMovingPlatform()
 	MovingplatformSpeed = 20;
 }
 
+
+void AMovingPlatform::BeginPlay()
+{
+	Super::BeginPlay();
+
+	GlobalStartLocation = GetActorLocation();
+	GlobalTargetLocation = GetTransform().TransformPosition(TargetLocation);
+
+}
+
+
+
 void AMovingPlatform::Tick(float DeltaSeconds)
 {
 
 	if (HasAuthority())
 	{
 		FVector Location = GetActorLocation();
-		FVector GolbalTargetLocation = GetTransform().TransformPosition(TargetLocation);
-		FVector Direction = (GolbalTargetLocation -Location).GetSafeNormal();
+		
+		float JourneyLength = (GlobalTargetLocation - GlobalStartLocation).Size();
+		float JourneyTravelled = (Location - GlobalStartLocation).Size();
+		
+		if (JourneyTravelled >= JourneyLength)
+		{
+			FVector Swap = GlobalStartLocation;
+			GlobalStartLocation = GlobalTargetLocation;
 
-		Location += MovingplatformSpeed*DeltaSeconds*Direction;
+			GlobalTargetLocation = Swap;
+		}
+		FVector Direction = (GlobalTargetLocation - GlobalStartLocation).GetSafeNormal();
+
+		Location += MovingplatformSpeed * DeltaSeconds*Direction;
 		this->SetActorLocation(Location);
+		
 	}
 	
 	
 }
 
-
-
-void AMovingPlatform::BeginPlay()
-{
-	Super::BeginPlay();
-}
