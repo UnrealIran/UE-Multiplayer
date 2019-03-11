@@ -2,10 +2,16 @@
 
 #include "PuzzlePlatformGameInstance.h"
 #include "Engine/Engine.h"
-
+#include "UObject/ConstructorHelpers.h"
+#include "Blueprint/UserWidget.h"
 UPuzzlePlatformGameInstance::UPuzzlePlatformGameInstance(const FObjectInitializer & ObjectInitializer)
 {
-	UE_LOG(LogTemp,Warning,TEXT("You are in constructor"))
+	static ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/MenuSystem/WBP_MenuSystem"));
+	MenuClass = MenuBPClass.Class;
+	if (MenuClass) 
+	{
+		UE_LOG(LogTemp, Warning, TEXT("It is found %s"),*MenuClass->GetName())
+	}
 }
 
 void UPuzzlePlatformGameInstance::Init()
@@ -21,9 +27,13 @@ void UPuzzlePlatformGameInstance::Host()
 	UWorld* World = GetWorld();
 	if (!ensure(World != nullptr)) { return; }
 	World->ServerTravel("/Game/Maps/ThirdPersonExampleMap?listen");
+	
 }
 
 void UPuzzlePlatformGameInstance::Join(const FString& Address)
 {
 	GEngine->AddOnScreenDebugMessage(0, 5, FColor::Green, FString::Printf(TEXT("Joing %s"),*Address));
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!ensure(PlayerController != nullptr)) { return; }
+	PlayerController->ClientTravel(Address, ETravelType::TRAVEL_Absolute);
 }
