@@ -7,19 +7,26 @@
 UPuzzlePlatformGameInstance::UPuzzlePlatformGameInstance(const FObjectInitializer & ObjectInitializer)
 {
 	static ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/MenuSystem/WBP_MenuSystem"));
+	if (!ensure(MenuBPClass.Class != nullptr)) { return; }
 	MenuClass = MenuBPClass.Class;
-	if (MenuClass) 
-	{
-		UE_LOG(LogTemp, Warning, TEXT("It is found %s"),*MenuClass->GetName())
-	}
+	
 }
-
 void UPuzzlePlatformGameInstance::Init()
 {
 	Super::Init();
 	
-	UE_LOG(LogTemp,Warning,TEXT("You are in init"))
+	UE_LOG(LogTemp, Warning, TEXT("It is found %s"), *MenuClass->GetName())
 }
+
+void UPuzzlePlatformGameInstance::LoadMenu()
+{
+	if (!ensure(MenuClass != nullptr)) { return; }
+	UUserWidget* Menu=CreateWidget<UUserWidget>(this, MenuClass);
+	if (!ensure(Menu != nullptr)) { return; }
+	Menu->AddToViewport();
+	//Menu->PlayAnimation()
+}
+
 
 void UPuzzlePlatformGameInstance::Host()
 {
